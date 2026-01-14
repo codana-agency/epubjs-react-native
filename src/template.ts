@@ -54,6 +54,7 @@ export default `
       const theme = window.theme;
       const initialLocations = window.locations;
       const enableSelection = window.enable_selection;
+      const fontUrls = window.fontUrls;
 
       if (!file) {
         alert('Failed load book');
@@ -246,6 +247,36 @@ export default `
       rendition.on('started', () => {
         rendition.themes.register({ theme: theme });
         rendition.themes.select('theme');
+      });
+
+      // Inject custom fonts into epub content iframes
+      rendition.hooks.content.register((contents) => {
+        const doc = contents.document;
+        
+        if (fontUrls && Array.isArray(fontUrls) && fontUrls.length > 0) {
+          // Add preconnect for Google Fonts if any font URL is from Google Fonts
+          const hasGoogleFonts = fontUrls.some(url => url.includes('fonts.googleapis.com'));
+          if (hasGoogleFonts) {
+            const preconnect1 = doc.createElement('link');
+            preconnect1.rel = 'preconnect';
+            preconnect1.href = 'https://fonts.googleapis.com';
+            doc.head.appendChild(preconnect1);
+            
+            const preconnect2 = doc.createElement('link');
+            preconnect2.rel = 'preconnect';
+            preconnect2.href = 'https://fonts.gstatic.com';
+            preconnect2.crossOrigin = '';
+            doc.head.appendChild(preconnect2);
+          }
+          
+          // Add each font stylesheet
+          fontUrls.forEach(fontUrl => {
+            const fontLink = doc.createElement('link');
+            fontLink.href = fontUrl;
+            fontLink.rel = 'stylesheet';
+            doc.head.appendChild(fontLink);
+          });
+        }
       });
 
       rendition.on("relocated", function (location) {

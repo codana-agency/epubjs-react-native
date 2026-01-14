@@ -1,17 +1,17 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Platform } from 'react-native';
-import { LoadingFile } from './utils/LoadingFile';
-import type { ReaderProps } from './types';
-import { View } from './View';
-import { useInjectWebViewVariables } from './hooks/useInjectWebviewVariables';
 import { ReaderContext, defaultTheme as initialTheme } from './context';
-import { isURL } from './utils/isURL';
-import { getSourceType } from './utils/getSourceType';
-import { getSourceName } from './utils/getPathname';
-import { SourceType } from './utils/enums/source-type.enum';
-import { isFsUri } from './utils/isFsUri';
-import jszip from './jszip';
 import epubjs from './epubjs';
+import { useInjectWebViewVariables } from './hooks/useInjectWebviewVariables';
+import jszip from './jszip';
+import type { ReaderProps } from './types';
+import { SourceType } from './utils/enums/source-type.enum';
+import { getSourceName } from './utils/getPathname';
+import { getSourceType } from './utils/getSourceType';
+import { isFsUri } from './utils/isFsUri';
+import { isURL } from './utils/isURL';
+import { LoadingFile } from './utils/LoadingFile';
+import { View } from './View';
 
 export function Reader({
   src,
@@ -32,6 +32,8 @@ export function Reader({
   spread,
   fullsize,
   charactersPerLocation,
+  fontUrls,
+  webviewDebuggingEnabled = false,
   ...rest
 }: ReaderProps) {
   const {
@@ -103,6 +105,7 @@ export function Reader({
                 spread,
                 fullsize,
                 charactersPerLocation,
+                fontUrls,
               })
             );
 
@@ -125,6 +128,7 @@ export function Reader({
                 spread,
                 fullsize,
                 charactersPerLocation,
+                fontUrls,
               })
             );
 
@@ -157,6 +161,7 @@ export function Reader({
                 spread,
                 fullsize,
                 charactersPerLocation,
+                fontUrls,
               })
             );
 
@@ -185,6 +190,7 @@ export function Reader({
                 spread,
                 fullsize,
                 charactersPerLocation,
+                fontUrls,
               })
             );
 
@@ -201,6 +207,7 @@ export function Reader({
     documentDirectory,
     downloadFile,
     enableSelection,
+    fontUrls,
     initialLocations,
     injectWebViewVariables,
     setIsLoading,
@@ -258,6 +265,7 @@ export function Reader({
       manager={manager}
       flow={flow}
       snap={snap}
+      webviewDebuggingEnabled={webviewDebuggingEnabled}
       {...rest}
     />
   );

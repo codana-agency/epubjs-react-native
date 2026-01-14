@@ -496,4 +496,25 @@ export interface ReaderProps {
    * Default is 1600
    */
   charactersPerLocation?: number;
+
+  /**
+   * Array of font stylesheet URLs to inject into the EPUB content.
+   * These will be added as <link rel="stylesheet"> tags in the EPUB iframe head.
+   * @example
+   * ```
+   * <Reader
+   *  fontUrls={[
+   *    'https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap',
+   *    'https://example.com/fonts/custom.css'
+   *  ]}
+   * />
+   * ```
+   */
+  fontUrls?: string[];
+
+  /**
+   * Enable WebView debugging for development purposes.
+   * Default is `false`.
+   */
+  webviewDebuggingEnabled?: boolean;
 }

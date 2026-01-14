@@ -7,9 +7,9 @@ import type {
 } from 'react-native-webview/lib/WebViewTypes';
 import { defaultTheme as initialTheme, ReaderContext } from './context';
 import type { Bookmark, ReaderProps } from './types';
+import { GestureHandler } from './utils/GestureHandler';
 import { OpeningBook } from './utils/OpeningBook';
 import INTERNAL_EVENTS from './utils/internalEvents.util';
-import { GestureHandler } from './utils/GestureHandler';
 
 export type ViewProps = Omit<ReaderProps, 'src' | 'fileSystem'> & {
   templateUri: string;
@@ -77,6 +77,7 @@ export function View({
   keepScrollOffsetOnLocationChange,
   flow,
   onChangeSection = () => {},
+  webviewDebuggingEnabled = false,
 }: ViewProps) {
   const {
     registerBook,
@@ -466,6 +467,7 @@ export function View({
       )}
 
       <WebView
+        webviewDebuggingEnabled={webviewDebuggingEnabled}
         ref={book}
         source={{ uri: templateUri }}
         showsVerticalScrollIndicator={false}
