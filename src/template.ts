@@ -11,13 +11,20 @@ export default `
     <script id="epubjs"></script>
 
     <style type="text/css">
-      body {
+      html, body {
         margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
       }
 
       #viewer {
-        height: 100vh;
-        width: 100vw;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
         overflow: hidden !important;
         display: flex;
         justify-content: center;
@@ -81,6 +88,16 @@ export default `
       });
      const reactNativeWebview = window.ReactNativeWebView !== undefined && window.ReactNativeWebView!== null ? window.ReactNativeWebView: window;
       reactNativeWebview.postMessage(JSON.stringify({ type: "onStarted" }));
+
+      function debugLog(label, data) {
+        try {
+          reactNativeWebview.postMessage(JSON.stringify({
+            type: "onDebugLog",
+            label: label,
+            data: data || {}
+          }));
+        } catch (e) {}
+      }
 
       function flatten(chapters) {
         return [].concat.apply([], chapters.map((chapter) => [].concat.apply([chapter], flatten(chapter.subitems))));
@@ -284,6 +301,39 @@ export default `
         var percentage = Math.floor(percent * 100);
         var chapter = getChapter(location);
 
+        var container = null;
+        try {
+          if (rendition.manager && rendition.manager.container) {
+            var c = rendition.manager.container;
+            container = {
+              scrollWidth: c.scrollWidth,
+              scrollHeight: c.scrollHeight,
+              scrollLeft: c.scrollLeft,
+              scrollTop: c.scrollTop,
+              offsetWidth: c.offsetWidth,
+              offsetHeight: c.offsetHeight
+            };
+          }
+        } catch (e) {}
+        var spineIndex = -1;
+        var isLastSection = false;
+        try {
+          if (book.spine && location.start && location.start.href) {
+            var item = book.spine.get(location.start.href);
+            if (item) spineIndex = item.index;
+            var last = book.spine.last();
+            isLastSection = last && item && item.index === last.index;
+          }
+        } catch (e) {}
+        debugLog("relocated", {
+          atStart: !!location.atStart,
+          atEnd: !!location.atEnd,
+          spineIndex: spineIndex,
+          isLastSection: isLastSection,
+          href: location.start && location.start.href,
+          container: container
+        });
+
         reactNativeWebview.postMessage(JSON.stringify({
           type: "onLocationChange",
           totalLocations: book.locations.total,
@@ -357,6 +407,40 @@ export default `
           layout: layout,
         }));
       });
+
+      (function wrapRenditionNextPrev() {
+        var _next = rendition.next.bind(rendition);
+        var _prev = rendition.prev.bind(rendition);
+        rendition.next = function () {
+          var container = null;
+          try {
+            if (rendition.manager && rendition.manager.container) {
+              var c = rendition.manager.container;
+              container = {
+                scrollWidth: c.scrollWidth,
+                scrollLeft: c.scrollLeft,
+                offsetWidth: c.offsetWidth,
+                delta: rendition.manager.layout && rendition.manager.layout.delta
+              };
+            }
+          } catch (e) {}
+          var hasNextSection = false;
+          try {
+            if (book.spine && rendition.manager && rendition.manager.views && rendition.manager.views.last) {
+              var lastView = rendition.manager.views.last();
+              var sec = lastView && lastView.section;
+              var lastSpine = book.spine.last();
+              hasNextSection = !!(sec && lastSpine && sec.index != null && sec.index < lastSpine.index);
+            }
+          } catch (e) {}
+          debugLog("next() called", { container: container, hasNextSection: hasNextSection });
+          return _next();
+        };
+        rendition.prev = function () {
+          debugLog("prev() called", {});
+          return _prev();
+        };
+      })();
     </script>
   </body>
 </html>

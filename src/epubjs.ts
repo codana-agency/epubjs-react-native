@@ -2652,6 +2652,54 @@ export default `
                     }.bind(this),
                   )
               );
+            } else if (
+              this.views.length &&
+              this.isPaginated &&
+              !this.views.last().section.next()
+            ) {
+              var _scrollWidth = this.container.scrollWidth;
+              var _offsetWidth = this.container.offsetWidth;
+              var _delta = this.layout.delta;
+              var _scrollLeft = this.scrollLeft;
+              var _scrollTop = this.scrollTop;
+              var atEndOfView =
+                "horizontal" === this.settings.axis
+                  ? _scrollLeft + _offsetWidth + _delta > _scrollWidth - 2
+                  : "vertical" === this.settings.axis
+                    ? _scrollTop +
+                        this.container.offsetHeight +
+                        this.layout.height >
+                      this.container.scrollHeight - 2
+                    : !1;
+              if (atEndOfView) {
+                if (
+                  "horizontal" === this.settings.axis &&
+                  "ltr" === this.settings.direction
+                ) {
+                  var _rem = _scrollWidth - _scrollLeft - _offsetWidth;
+                  if (_rem > 0)
+                    this.scrollBy(Math.min(_rem, _delta), 0, !0);
+                } else if (
+                  "horizontal" === this.settings.axis &&
+                  "rtl" === this.settings.direction
+                ) {
+                  var _remR = _scrollLeft;
+                  if (_remR > 0)
+                    this.scrollBy(-Math.min(_remR, _delta), 0, !0);
+                } else if ("vertical" === this.settings.axis) {
+                  var _remV =
+                    this.container.scrollHeight -
+                    _scrollTop -
+                    this.container.offsetHeight;
+                  if (_remV > 0) {
+                    this.scrollBy(
+                      0,
+                      Math.min(_remV, this.layout.height),
+                      !0
+                    );
+                  }
+                }
+              }
             }
           }
         }
